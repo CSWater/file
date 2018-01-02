@@ -12,7 +12,8 @@ public class TicketingDS implements TicketingSystem {
 	public int totalseatnum;
 	public int sum_seats;
 	
-	Random rand;
+	//a random start point select
+	Random rand = new Random();
 	//use to produce ticketid
 	public AtomicInteger tid = new AtomicInteger(0);
 	//trains
@@ -20,7 +21,6 @@ public class TicketingDS implements TicketingSystem {
 	
 
 	TicketingDS(){
-		rand = new Random();
 		this.routenum = 5;
 		this.coachnum = 8;
 		this.seatnum = 100;
@@ -34,7 +34,6 @@ public class TicketingDS implements TicketingSystem {
 	}
 	
 	TicketingDS(int routenum,int coachnum,int seatnum,int stationnum,int threadnum){
-		rand = new Random();
 		this.routenum = routenum;
 		this.coachnum = coachnum;
 		this.seatnum = seatnum;
@@ -52,9 +51,9 @@ public class TicketingDS implements TicketingSystem {
 		//buy tickets in the route you want
 		Train train = trains[route - 1];
 		//according to thread id to select a start point
-		//long idx = Thread.currentThread().getId();
-		//int start_point = ((int)idx & 0x40);				//select a start point to buy ticket
-		int start_point = rand.nextInt(sum_seats);
+		long idx = Thread.currentThread().getId();
+		int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
+		//int start_point = rand.nextInt(sum_seats);
 		int[] ticketinfo = train.tryBuyTicket(start_point, departure, arrival);
 		if(ticketinfo != null) {
 			ticket.arrival = arrival;
@@ -64,6 +63,7 @@ public class TicketingDS implements TicketingSystem {
 			ticket.route = route;
 			ticket.seat = ticketinfo[1];
 			ticket.tid = (long) tid.getAndIncrement();
+			//ticket.tid=0;
 			return ticket;
 		}
 		return null;
