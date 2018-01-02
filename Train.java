@@ -17,13 +17,10 @@ public class Train {
 		}
 	}
 	
-	public int[] buyTicket(int start_point, int departure, int arrival) {
-		
+	public int[] buyTicket(int start_point, int obj_ticket) {	
 		int[] ticketinf = new int[2];
-		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		boolean flag1 = false;
 		boolean flag2 = false;
-		try {
 			for(int seat_index = start_point; seat_index < seat_num; ++seat_index) {
 			Seat seat = seats[seat_index];
 			flag1 = seat.isEmpty(obj_ticket);
@@ -44,11 +41,7 @@ public class Train {
 				return ticketinf;
 			}
 		}
-		} catch(Exception e) {
-			System.out.println(start_point);
-		}
 		flag1 = flag2 = false;
-		try {
 		for(int seat_index = 0; seat_index < start_point; ++seat_index) {
 			Seat seat = seats[seat_index];
 			flag1 = seat.isEmpty(obj_ticket);
@@ -69,15 +62,11 @@ public class Train {
 				return ticketinf;
 			}
 		}
-		} catch (Exception e) {
-			System.out.println(start_point);
-		}
-			return null;
+		return null;
 	}
 	
-	public boolean refundTicket(int coachindex,int seatindex,int departure,int arrival) {	
+	public boolean refundTicket(int coachindex,int seatindex,int obj_ticket) {	
 		Seat seat = seats[coachindex * coach_size + seatindex];
-		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		seat.seatlock.lock();
 		try {
 			seat.refund(obj_ticket);
@@ -87,9 +76,8 @@ public class Train {
 		return true;
 	}
 		
-	public int inquiry(int departure, int arrival) {
+	public int inquiry(int obj_ticket) {
 		int count = 0;
-		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		for(int seat_index = 0; seat_index < seat_num; ++seat_index) {
 			if(seats[seat_index].isEmpty(obj_ticket)) {
 				++count;
