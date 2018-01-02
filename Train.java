@@ -17,21 +17,22 @@ public class Train {
 		}
 	}
 	
-	public int[] tryBuyTicket(int start_point, int departure, int arrival) {
+	public int[] buyTicket(int start_point, int departure, int arrival) {
 		
 		int[] ticketinf = new int[2];
+		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		boolean flag1 = false;
 		boolean flag2 = false;
 		try {
 			for(int seat_index = start_point; seat_index < seat_num; ++seat_index) {
 			Seat seat = seats[seat_index];
-			flag1 = seat.validate(departure, arrival);
+			flag1 = seat.isEmpty(obj_ticket);
 			if(flag1) {
 				seat.seatlock.lock();
 				try {
-					flag2 = seat.validate(departure, arrival);
+					flag2 = seat.isEmpty(obj_ticket);
 					if(flag2) {
-						seat.lockSeat(departure, arrival);							
+						seat.buy(obj_ticket);							
 					}
 				}finally {
 					seat.seatlock.unlock();
@@ -50,13 +51,13 @@ public class Train {
 		try {
 		for(int seat_index = 0; seat_index < start_point; ++seat_index) {
 			Seat seat = seats[seat_index];
-			flag1 = seat.validate(departure, arrival);
+			flag1 = seat.isEmpty(obj_ticket);
 			if(flag1) {
 				seat.seatlock.lock();
 				try {
-					flag2 = seat.validate(departure, arrival);
+					flag2 = seat.isEmpty(obj_ticket);
 					if(flag2) {
-						seat.lockSeat(departure, arrival);
+						seat.buy(obj_ticket);
 					}
 				}finally {
 					seat.seatlock.unlock();
@@ -76,9 +77,10 @@ public class Train {
 	
 	public boolean refundTicket(int coachindex,int seatindex,int departure,int arrival) {	
 		Seat seat = seats[coachindex * coach_size + seatindex];
+		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		seat.seatlock.lock();
 		try {
-			seat.unlockSeat(departure, arrival);
+			seat.refund(obj_ticket);
 		}finally {
 			seat.seatlock.unlock();
 		}
@@ -87,8 +89,9 @@ public class Train {
 		
 	public int inquiry(int departure, int arrival) {
 		int count = 0;
+		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		for(int seat_index = 0; seat_index < seat_num; ++seat_index) {
-			if(seats[seat_index].validate(departure, arrival)) {
+			if(seats[seat_index].isEmpty(obj_ticket)) {
 				++count;
 			}
 		}

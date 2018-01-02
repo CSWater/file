@@ -51,10 +51,12 @@ public class TicketingDS implements TicketingSystem {
 		//buy tickets in the route you want
 		Train train = trains[route - 1];
 		//according to thread id to select a start point
-		long idx = Thread.currentThread().getId();
-		int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
+		//long idx = Thread.currentThread().getId();
+		//int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
 		//int start_point = rand.nextInt(sum_seats);
-		int[] ticketinfo = train.tryBuyTicket(start_point, departure, arrival);
+		long tm = System.currentTimeMillis();
+		int start_point = (int)(tm & 0x1ff);
+		int[] ticketinfo = train.buyTicket(start_point, departure, arrival);
 		if(ticketinfo != null) {
 			ticket.arrival = arrival;
 			ticket.coach = ticketinfo[0];

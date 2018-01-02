@@ -14,29 +14,20 @@ public class Seat {
 	}
 	
 	//validate a seat
-	public boolean validate(int departure, int arrival) {
-		int check_up = (1 << departure) - 1;
-		int check_bottom = (1 << arrival) - 1;
-		int check_num = check_up ^ check_bottom;
-		if((check_num & seat_state) == 0)
+	public boolean isEmpty(int ticket) {
+		if((seat_state & ticket) == 0)
 			return true;
 		return false;
 	}
 	
 	//buy a ticket on this seat
-	public void lockSeat(int departure, int arrival) {
-		int check_up = (1 << departure) - 1;
-		int check_bottom = (1 << arrival) - 1;
-		int check_num = check_up ^ check_bottom;
-		seat_state = seat_state | check_num;
+	public void buy(int ticket) {
+		seat_state = seat_state | ticket;
 	}
 	
 	//refund a ticket on this seat
-	public void unlockSeat(int departure, int arrival) {
-		int check_up = (1 << departure) - 1;
-		int check_bottom = (1 << arrival) - 1;
-		int check_num = check_up ^ check_bottom;
-		seat_state = seat_state ^ check_num;
+	public void refund(int ticket) {
+		seat_state = seat_state ^ ticket;
 		
 	}
 }
