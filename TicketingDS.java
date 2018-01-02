@@ -1,6 +1,7 @@
 package ticketingsystem;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TicketingDS implements TicketingSystem {
@@ -13,7 +14,7 @@ public class TicketingDS implements TicketingSystem {
 	public int sum_seats;
 	
 	//a random start point select
-	Random rand = new Random();
+	//ThreadLocalRandom rand = new ThreadLocalRandom();
 	//use to produce ticketid
 	public AtomicInteger tid = new AtomicInteger(0);
 	//trains
@@ -47,14 +48,14 @@ public class TicketingDS implements TicketingSystem {
 	}
 	
 	public Ticket buyTicket(String passenger, int route, int departure, int arrival) {
-		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
+		long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		Ticket ticket = new Ticket();
 		//buy tickets in the route you want
 		Train train = trains[route - 1];
 		//according to thread id to select a start point
 		//long idx = Thread.currentThread().getId();
 		//int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
-		//int start_point = rand.nextInt(sum_seats);
+		//int start_point = rand.nextInt(0, sum_seats);
 		long tm = System.nanoTime();
 		int start_point = (int)(tm & 0x1ff);
 		int[] ticketinfo = train.buyTicket(start_point, obj_ticket);
@@ -72,7 +73,7 @@ public class TicketingDS implements TicketingSystem {
 	}
 	
 	public int inquiry(int route, int departure, int arrival) {
-		int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
+		long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		return trains[route-1].inquiry(obj_ticket);
 	}
 	
@@ -82,9 +83,9 @@ public class TicketingDS implements TicketingSystem {
 			int coachindex = ticket.coach - 1;
 			int departure = ticket.departure;
 			int arrival = ticket.arrival;
-			int obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
+			long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 			int route = ticket.route - 1;
-			return trains[route].refundTicket(coachindex, seatindex , obj_ticket);
+			return trains[route].refund(coachindex, seatindex , obj_ticket);
 		}
 		else
 			return false;
