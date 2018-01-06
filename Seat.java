@@ -5,12 +5,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Seat {
 	volatile int seat_state;
-	final Lock seat_lock;
+	//final Lock seat_lock;
+	final BLock seat_lock;
 	public int station_num;
 	
 	public Seat(int station_num, int thread_num){
 		this.station_num = station_num;
-		this.seat_lock = new ALock(thread_num);
+		this.seat_lock = new BLock(thread_num);
 		seat_state = 0;					//init state
 	}
 	

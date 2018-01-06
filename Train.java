@@ -62,14 +62,14 @@ public class Train {
 		boolean flag = false;
 		for(int i = 0; i < seat_num; ++i) {
 			if(seats[i].isEmpty(ticket) ) {
-				seats[i].seat_lock.lock();
+				seats[i].seat_lock.lock(ticket);
 				try {
 					flag = seats[i].isEmpty(ticket);
 					if(flag) {
 						seats[i].buy(ticket);							
 					}
 				}	finally {
-					seats[i].seat_lock.unlock();
+					seats[i].seat_lock.unlock(ticket);
 				}
 			}
 			if(flag) {					//buy ticket successfully
@@ -88,11 +88,11 @@ public class Train {
 	public boolean refund(int coachindex,int seatindex, int departure, int arrival) {
 		int ticket = (1 << arrival) - (1 << departure);
 		Seat seat = seats[coachindex * coach_size + seatindex];
-		seat.seat_lock.lock();
+		seat.seat_lock.lock(ticket);
 		try {
 			seat.refund(ticket);
 		}finally {
-			seat.seat_lock.unlock();
+			seat.seat_lock.unlock(ticket);
 		}
 		for(int i = departure; i < arrival; ++i) {
 			interval[i]++;
