@@ -18,66 +18,65 @@ public class Test {
 		final int stationnum = Integer.valueOf(args[4]);
 		final int testnum = Integer.valueOf(args[5]);
 		
-		//final AtomicInteger throughtput = new AtomicInteger(0);
-		
 		Thread[] threads = new Thread[threadnum];
 		final TicketingDS tds = new TicketingDS(routenum, coachnum, seatnum, stationnum, threadnum);
-		
-		long starttime = System.nanoTime();//begin timing
-		
+		final double[] latency = new double[256];
+		for(int i = 0; i < 256; ++i) {
+			latency[i] = 0.0;
+		}
+		//begin timing
+		long starttime = System.nanoTime();		
 		for (int i = 0; i< threadnum; i++) {
             threads[i] = new Thread(new Runnable() {
                 public void run() {
                     Random rand = new Random();
                     Ticket ticket = new Ticket();
                     ArrayList<Ticket> soldTicket = new ArrayList<Ticket>();
-
+                    long local_start = System.nanoTime();
                     for (int i = 0; i < testnum; i++) {
                         int sel = rand.nextInt(inqpc);
-                        if (0 <= sel && sel < retpc && soldTicket.size() > 0) { // return ticket
+                        if (0 <= sel && sel < retpc && soldTicket.size() > 0) { // refund ticket
                             int select = rand.nextInt(soldTicket.size());
                             if ((ticket = soldTicket.remove(select)) != null) {
                             	tds.refundTicket(ticket);
-                            	//throughtput.getAndIncrement();
                             } 
                         } 
-                        else if (retpc <= sel && sel < buypc) { // buy ticket
+                        else if (retpc <= sel && sel < buypc) { 				// buy ticket
                             String passenger = ThreadId.get() + "passenger" + i;
-                            int route = 1;//rand.nextInt(routenum) + 1;
+                            int route = rand.nextInt(routenum)+ 1;
                             int departure = rand.nextInt(stationnum - 1) + 1;
                             int arrival = departure + rand.nextInt(stationnum - departure) + 1; // arrival is always greater than departure
                             ticket = tds.buyTicket(passenger, route, departure, arrival);
-                            //throughtput.getAndIncrement();
                             if (ticket != null) 
                                 soldTicket.add(ticket);          
                         } 
-                        else if (buypc <= sel && sel < inqpc) { // inquiry ticket
-
+                        else if (buypc <= sel && sel < inqpc) { 				// inquiry ticket
                             int route = rand.nextInt(routenum) + 1;
                             int departure = rand.nextInt(stationnum - 1) + 1;
                             int arrival = departure + rand.nextInt(stationnum - departure) + 1; // arrival is always greater than departure
                             tds.inquiry(route, departure, arrival);
-                            //throughtput.getAndIncrement();
                         }
                     }
-                    
-//                    for(int i = 0; i < soldTicket.size(); ++ i) {
-//                    	System.out.println(soldTicket.get(i).route + " " + soldTicket.get(i).coach + " " + soldTicket.get(i).seat +" "+soldTicket.get(i).departure + " " +soldTicket.get(i).arrival);
-//                    }
-
+                    long idx = Thread.currentThread().getId();
+                    latency[(int)idx] = (System.nanoTime()-local_start)/1000000000.0;
                 }
             });
             threads[i].start();
         }
-
         for (int i = 0; i< threadnum; i++) {
             threads[i].join();
         }
-        double timecount = (System.nanoTime()-starttime)/1000000000.0;//total time
-        
-        System.out.println("total time(s):"+timecount);
-        System.out.println("sold-tickets count(include those have been refund):"+tds.tid);
-        System.out.println("throughtput(time/s):"+  ( threadnum * testnum ) / timecount );
+        double run_time = (System.nanoTime()-starttime)/1000000000.0;								//total time
+        double throughput = (threadnum * testnum) / run_time;
+        double total_time = 0.0;
+        for(int i = 0; i < 256; ++i) {
+        	total_time += latency[i];
+        }
+        double call_latency = (threadnum * testnum ) / total_time / 1000000000.0;
+        System.out.println("total time(s):" + run_time);
+        System.out.println("sold-tickets:" + tds.tid);
+        System.out.println("average latency(s/call):" + call_latency);
+        System.out.println("throughtput(call/s):"+  throughput );
 	}
 
 }

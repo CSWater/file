@@ -48,7 +48,6 @@ public class TicketingDS implements TicketingSystem {
 	}
 	
 	public Ticket buyTicket(String passenger, int route, int departure, int arrival) {
-		long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 		Ticket ticket = new Ticket();
 		//buy tickets in the route you want
 		Train train = trains[route - 1];
@@ -56,9 +55,9 @@ public class TicketingDS implements TicketingSystem {
 		//long idx = Thread.currentThread().getId();
 		//int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
 		//int start_point = rand.nextInt(0, sum_seats);
-		long tm = System.nanoTime();
-		int start_point = (int)(tm & 0x1ff);
-		int[] ticketinfo = train.buyTicket(start_point, obj_ticket);
+		//long tm = System.nanoTime();
+		//int start_point = (int)(tm & 0x1ff);
+		int[] ticketinfo = train.buyTicket(departure, arrival);
 		if(ticketinfo != null) {
 			ticket.arrival = arrival;
 			ticket.coach = ticketinfo[0];
@@ -83,9 +82,8 @@ public class TicketingDS implements TicketingSystem {
 			int coachindex = ticket.coach - 1;
 			int departure = ticket.departure;
 			int arrival = ticket.arrival;
-			long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
 			int route = ticket.route - 1;
-			return trains[route].refund(coachindex, seatindex , obj_ticket);
+			return trains[route].refund(coachindex, seatindex , departure, arrival);
 		}
 		else
 			return false;
