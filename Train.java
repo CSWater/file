@@ -1,89 +1,107 @@
 package ticketingsystem;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Train {
 	public int coach_size;			//how many seats per coach
 	public int coach_num;			//hou many coaches per train
 	public int seat_num;			//how many seats per train
-	Seat[] seats;
+	//private AtomicInteger interval[] ;
+	private int interval[];
+	private Seat[] seats;
+	final Lock train_lock = new ReentrantLock();
 	
-	public Train(int num_coach_per_train, int num_seat_per_coach, int num_station) {
+	public Train(int num_coach_per_train, int num_seat_per_coach, int num_station, int thread_num) {
 		coach_size = num_seat_per_coach;
 		coach_num = num_coach_per_train;
 		seat_num = coach_num * coach_size;
-		seats = new Seat[seat_num];	
-		for(int i = 0;i < seat_num; ++i) {
-			seats[i] = new Seat(num_station);
+		interval = new int[num_station];
+		seats = new Seat[seat_num];
+		for(int i = 0; i < seat_num; ++i) {
+			seats[i] = new Seat(num_station, thread_num);
+		}
+		for(int i = 0; i < num_station - 1; i++) {
+			interval[i] = seat_num;
 		}
 	}
 	
-	public int[] buyTicket(int start_point, long obj_ticket) {	
-		int[] ticketinf = new int[2];
-		boolean flag1 = false;
-		boolean flag2 = false;
-			for(int seat_index = start_point; seat_index < seat_num; ++seat_index) {
-			Seat seat = seats[seat_index];
-			flag1 = seat.isEmpty(obj_ticket);
-			if(flag1) {
-				seat.seatlock.lock();
-				try {
-					flag2 = seat.isEmpty(obj_ticket);
-					if(flag2) {
-						seat.buy(obj_ticket);							
-					}
-				}finally {
-					seat.seatlock.unlock();
-				}
-			}
-			if(flag2) {
-				ticketinf[0] = seat_index / coach_size + 1;
-				ticketinf[1] = seat_index % coach_size + 1;
-				return ticketinf;
-			}
+	public int minmize(int departure, int arrival) {
+		int min = 0x7fffffff;					//may be bigger enough
+		for(int i = departure; i < arrival; ++i) {
+			if(min > interval[i])
+				min = interval[i];
 		}
-		flag1 = flag2 = false;
-		for(int seat_index = 0; seat_index < start_point; ++seat_index) {
-			Seat seat = seats[seat_index];
-			flag1 = seat.isEmpty(obj_ticket);
-			if(flag1) {
-				seat.seatlock.lock();
+		return min;
+	}
+	
+	public int maxmize(int departure, int arrival) {
+		int max = -1;
+		for(int i = departure; i < arrival; ++i) {
+			if(max < interval[i]) 
+				max = interval[i];
+		}
+		return max;
+	}
+	
+	public int generateTicketID(int departure, int arrival) {
+		//@TODO
+		int ticketID = 0;
+		return ticketID;
+	}
+	
+	public void reserveTicket(int departure, int arrival) {
+		for(int i = departure; i < arrival; ++i) {
+			interval[i] -= 1;
+		}
+	}
+	
+	public int[] buyTicket(int departure, int arrival) {
+		int ticket = (1 << arrival) - (1 << departure);			//get the ticket
+		boolean flag = false;
+		for(int i = 0; i < seat_num; ++i) {
+			if(seats[i].isEmpty(ticket) ) {
+				seats[i].seat_lock.lock();
 				try {
-					flag2 = seat.isEmpty(obj_ticket);
-					if(flag2) {
-						seat.buy(obj_ticket);
+					flag = seats[i].isEmpty(ticket);
+					if(flag) {
+						seats[i].buy(ticket);							
 					}
-				}finally {
-					seat.seatlock.unlock();
+				}	finally {
+					seats[i].seat_lock.unlock();
 				}
 			}
-			if(flag2) {
-				ticketinf[0] = seat_index / coach_size + 1;
-				ticketinf[1] = seat_index % coach_size + 1;
-				return ticketinf;
+			if(flag) {					//buy ticket successfully
+				for(int j = departure; i < arrival; i++) {
+					interval[i]--;
+				}
+				int[] ticket_info = new int[2];
+				ticket_info[0] = i / coach_size + 1;
+				ticket_info[1] = i % coach_size + 1;
+				return ticket_info;
 			}
 		}
 		return null;
 	}
 	
-	public boolean refund(int coachindex,int seatindex, long obj_ticket) {	
+	public boolean refund(int coachindex,int seatindex, int departure, int arrival) {
+		int ticket = (1 << arrival) - (1 << departure);
 		Seat seat = seats[coachindex * coach_size + seatindex];
-		seat.seatlock.lock();
+		seat.seat_lock.lock();
 		try {
-			seat.refund(obj_ticket);
+			seat.refund(ticket);
 		}finally {
-			seat.seatlock.unlock();
+			seat.seat_lock.unlock();
+		}
+		for(int i = departure; i < arrival; ++i) {
+			interval[i]++;
 		}
 		return true;
 	}
 		
-	public int inquiry(long obj_ticket) {
-		int count = 0;
-		for(int seat_index = 0; seat_index < seat_num; ++seat_index) {
-			if(seats[seat_index].isEmpty(obj_ticket)) {
-				++count;
-			}
-		}
-		return count;
+	public int inquiry(int departure, int arrival) {
+		return minmize(departure, arrival);
 	}
 
 }
