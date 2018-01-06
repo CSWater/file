@@ -62,15 +62,19 @@ public class Train {
 		boolean flag = false;
 		for(int i = 0; i < seat_num; ++i) {
 			if(seats[i].isEmpty(ticket) ) {
-				seats[i].seat_lock.lock(ticket);
-				try {
-					flag = seats[i].isEmpty(ticket);
-					if(flag) {
-						seats[i].buy(ticket);							
+				if(seats[i].seat_lock.lock(ticket) ) {
+					try {
+						flag = seats[i].isEmpty(ticket);
+						if(flag) {
+							seats[i].buy(ticket);							
+						}
+					}	finally {
+						seats[i].seat_lock.unlock(ticket);
 					}
-				}	finally {
-					seats[i].seat_lock.unlock(ticket);
 				}
+			}
+			else {
+				continue;
 			}
 			if(flag) {					//buy ticket successfully
 				for(int j = departure; i < arrival; i++) {
