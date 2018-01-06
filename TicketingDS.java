@@ -1,7 +1,5 @@
 package ticketingsystem;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TicketingDS implements TicketingSystem {

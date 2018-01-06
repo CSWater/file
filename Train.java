@@ -1,6 +1,5 @@
 package ticketingsystem;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,15 +44,9 @@ public class Train {
 		return max;
 	}
 	
-	public int generateTicketID(int departure, int arrival) {
-		//@TODO
-		int ticketID = 0;
-		return ticketID;
-	}
-	
-	public void reserveTicket(int departure, int arrival) {
+	public void update(int departure, int arrival) {
 		for(int i = departure; i < arrival; ++i) {
-			interval[i] -= 1;
+			interval[i]--;
 		}
 	}
 	
@@ -73,9 +66,7 @@ public class Train {
 				}
 			}
 			if(flag) {					//buy ticket successfully
-				for(int j = departure; i < arrival; i++) {
-					interval[i]--;
-				}
+				update(departure, arrival);
 				int[] ticket_info = new int[2];
 				ticket_info[0] = i / coach_size + 1;
 				ticket_info[1] = i % coach_size + 1;

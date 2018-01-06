@@ -8,29 +8,28 @@ import java.util.concurrent.locks.Lock;
 public class ALock implements Lock{
     ThreadLocal<Integer> mySlotIndex = new ThreadLocal<Integer>();
     AtomicInteger tail;
-    volatile boolean [] flag;
+    volatile long[] flag;
     int size;
 
     public ALock(int capacity) {
-        size = 4 * capacity;
+    	size = capacity;
         tail = new AtomicInteger(0);
-        flag = new boolean[4 * capacity];
-        flag[0] = true;
+        flag = new long[capacity];
+        flag[0] = 1;
     }
 
     public void lock() {
-    	//System.out.println("lock");
-        int slot = (4 * tail.getAndIncrement()) % size;
+    	int slot = tail.getAndIncrement() % size;
         mySlotIndex.set(slot);
-        while (!flag[slot]) {
-            ;
+        while(flag[slot] == 0) {
+        	;
         }
     }
 
     public void unlock() {
         int slot = mySlotIndex.get();
-        flag[slot] = false;
-        flag[(slot + 4) % size] = true;
+        flag[slot] = 0;
+        flag[(slot + 1) % size] = 1;
     }
 
 	@Override
