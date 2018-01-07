@@ -2,7 +2,6 @@ package ticketingsystem;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Test {
 	static int retpc = 10; // return ticket operation is 10% percent
@@ -57,8 +56,7 @@ public class Test {
                             tds.inquiry(route, departure, arrival);
                         }
                     }
-                    long idx = Thread.currentThread().getId();
-                    latency[(int)idx] = (System.nanoTime()-local_start)/1000000000.0;
+                    latency[ThreadId.get()] = (System.nanoTime()-local_start)/1000000000.0;
                 }
             });
             threads[i].start();

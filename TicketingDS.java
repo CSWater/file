@@ -1,16 +1,14 @@
 package ticketingsystem;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TicketingDS implements TicketingSystem {
-	public int routenum;
-	public int coachnum;
-	public int seatnum;
-	public int stationnum;
-	public int threadnum;
-	public int totalseatnum;
+	public int route_num;
+	public int coach_num;
+	public int seat_num;
+	public int station_num;
+	public int thread_num;
+	public int totalseat_num;
 	public int sum_seats;
 	
 	//a random start point select
@@ -22,41 +20,36 @@ public class TicketingDS implements TicketingSystem {
 	
 
 	TicketingDS(){
-		this.routenum = 5;
-		this.coachnum = 8;
-		this.seatnum = 100;
-		this.stationnum = 10;
-		this.threadnum = 16;
-		sum_seats = coachnum * seatnum;
-		this.trains = new Train[routenum];
-		for (int i = 0;i < routenum;++i ) {
-			trains[i] = new Train(coachnum, seatnum, stationnum);
+		this.route_num = 5;
+		this.coach_num = 8;
+		this.seat_num = 100;
+		this.station_num = 10;
+		this.thread_num = 16;
+		sum_seats = coach_num * seat_num;
+		this.trains = new Train[route_num];
+		for (int i = 0;i < route_num;++i ) {
+			trains[i] = new Train(coach_num, seat_num, station_num, thread_num);
 		}
 	}
 	
-	TicketingDS(int routenum,int coachnum,int seatnum,int stationnum,int threadnum){
-		this.routenum = routenum;
-		this.coachnum = coachnum;
-		this.seatnum = seatnum;
-		this.stationnum = stationnum;
-		this.threadnum = threadnum;
-		sum_seats = coachnum * seatnum;
-		this.trains = new Train[routenum];
-		for (int i = 0;i < routenum;++i ) {
-			trains[i] = new Train(coachnum, seatnum, stationnum);
+	TicketingDS(int route_num,int coach_num,int seat_num,int station_num,int thread_num){
+		this.route_num = route_num;
+		this.coach_num = coach_num;
+		this.seat_num = seat_num;
+		this.station_num = station_num;
+		this.thread_num = thread_num;
+		sum_seats = coach_num * seat_num;
+		this.trains = new Train[route_num];
+		for (int i = 0;i < route_num;++i ) {
+			trains[i] = new Train(coach_num, seat_num, station_num, thread_num);
 		}
 	}
 	
 	public Ticket buyTicket(String passenger, int route, int departure, int arrival) {
+		
 		Ticket ticket = new Ticket();
 		//buy tickets in the route you want
 		Train train = trains[route - 1];
-		//according to thread id to select a start point
-		//long idx = Thread.currentThread().getId();
-		//int start_point = (((int)idx & 0x40));				//select a start point to buy ticket
-		//int start_point = rand.nextInt(0, sum_seats);
-		//long tm = System.nanoTime();
-		//int start_point = (int)(tm & 0x1ff);
 		int[] ticketinfo = train.buyTicket(departure, arrival);
 		if(ticketinfo != null) {
 			ticket.arrival = arrival;
