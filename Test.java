@@ -73,10 +73,10 @@ public class Test {
         	total_time += latency[i];
         }
         double call_latency = (threadnum * testnum ) / total_time / 1000000000.0;
-        System.out.println("total time(s):" + run_time);
-        System.out.println("sold-tickets:" + tds.tid);
-        System.out.println("average latency(s/call):" + call_latency);
-        System.out.println("throughtput(call/s):"+  throughput );
+        System.out.printf("total time(s):%11.5f\n", run_time);
+        System.out.printf("sold-tickets:%11d\n", tds.tid.get());
+        System.out.printf("average latency(s/call):%11.9f\n", call_latency);
+        System.out.printf("throughtput(call/s):%11.0f\n", throughput );
 	}
 
 }

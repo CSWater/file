@@ -55,7 +55,8 @@ public class Train {
 		return true;
 	}
 		
-	public int inquiry(long obj_ticket) {
+	public int inquiry(int departure, int arrival) {
+		int obj_ticket = (1 << arrival) - (1 << departure);
 		int count = 0;
 		for(int seat_index = 0; seat_index < seat_num; ++seat_index) {
 			if(seats[seat_index].isEmpty(obj_ticket)) {

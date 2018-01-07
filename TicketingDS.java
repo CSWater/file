@@ -72,8 +72,7 @@ public class TicketingDS implements TicketingSystem {
 	}
 	
 	public int inquiry(int route, int departure, int arrival) {
-		long obj_ticket = (((1 << departure) - 1) ^ ((1 << arrival) - 1) );
-		return trains[route-1].inquiry(obj_ticket);
+		return trains[route-1].inquiry(departure, arrival);
 	}
 	
 	public boolean refundTicket(Ticket ticket) {
