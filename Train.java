@@ -6,6 +6,8 @@ public class Train {
 	public int seat_num;			//how many seats per train
 	private Seat[] seats;
 	
+	private volatile int[] interval;
+	
 	public Train(int num_coach_per_train, int num_seat_per_coach, int num_station, int thread_num) {
 		coach_size = num_seat_per_coach;
 		coach_num = num_coach_per_train;
@@ -13,6 +15,10 @@ public class Train {
 		seats = new Seat[seat_num];
 		for(int i = 0; i < seat_num; ++i) {
 			seats[i] = new Seat(num_station, thread_num);
+		}
+		interval = new int[num_station];
+		for(int i = 0; i < num_station; ++i) {
+			interval[i] = seat_num;
 		}
 	}
 	
@@ -25,14 +31,15 @@ public class Train {
 				try {
 					flag = seats[i].isEmpty(ticket);
 					if(flag) {
-						seats[i].buy(ticket);	
+						seats[i].buy(ticket);
 					}
 				}	finally {
 					seats[i].seat_lock.unlock();
 				}
 			}
 			if(flag) {					//buy ticket successfully
-
+				for(int j = departure; j < arrival; ++j)
+					interval[j]--;
 				int[] ticket_info = new int[2];
 				ticket_info[0] = i / coach_size + 1;
 				ticket_info[1] = i % coach_size + 1;
@@ -51,16 +58,16 @@ public class Train {
 		}finally {
 			seat.seat_lock.unlock();
 		}
-
+		for(int i = departure; i < arrival; ++i)
+			interval[i]++;
 		return true;
 	}
 		
 	public int inquiry(int departure, int arrival) {
-		int ticket = (1 << arrival) - (1 << departure);
-		int count = 0;
-		for(int i = 0; i < seat_num; i++) {
-			if(seats[i].isEmpty(ticket))
-				count++;
+		int count = 0xffff;
+		for(int i = departure; i < arrival; ++i) {
+			if(count > interval[i])
+				count = interval[i];
 		}
 		return count;
 	}
